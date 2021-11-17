@@ -3,7 +3,7 @@ id: link-cut-tree
 redirects:
   - /adv/LCT
 title: 'Link Cut Tree'
-author: Benjamin Qi, Neo Wang
+author: Benjamin Qi, Neo Wang, Dustin Miao
 description: 'Dynamic operations on a rooted forest'
 prerequisites:
   - offline-del
@@ -13,7 +13,7 @@ frequency: 1
 
 ## Splay Tree
 
-### Tutorial
+### Resources
 
 <Resources>
 	<Resource
@@ -38,6 +38,59 @@ frequency: 1
 		url="https://github.com/Bibeknam/algorithmtutorprograms/blob/master/data-structures/splay-trees/SplayTree.cpp"
 	/>
 </Resources>
+
+### Tutorial
+
+Splay Trees are a type of self-balancing binary search tree that has the unique property that more commonly accessed nodes are more quickly retrievable. Like other BSTs, they achieve an amortized $\mathcal{O}(\log n)$ complexity for inserting, deleting, and searching. 
+
+#### Structure
+
+Because Splay Trees are BSTs, they satisfy the **binary search tree property** that for a given node $u$, all nodes $v$ in $u$'s left subtree satisfy $\texttt{key}(v) < \texttt{key}(u)$. Similarly, all nodes $w$ in $u$'s right subtree satisfy $\texttt{key}(u)$ < $\texttt{key}(w)$. 
+
+One form of balancing a splay tree is a **rotation**, where a child of some node $u$ becomes the root of that splay tree. When the left child becomes the new root, the rotation is a right rotation, or a **`zig`** operation. When the right child becomes the new root, the rotation is a left rotation, or a **`zag`** operation. The key idea of a splay tree is to bring some node $u$ to the top of the tree through rotations, while simultaneously balancing the tree.
+
+<!-- Insert Image of Zig/Zag -->
+
+Define an operation called a **`splay-step`** on some node $u$. Let $t$ be the parent of $u$ (if $u$ is not the root), and let $s$ be the parent of $t$ (if $t$ exists and is not the root). The goal of the splay step is to move $u$ to the position where $t$ is (that is, up two levels), without unbalancing the tree. The splay-step can be disected into the following cases:
+- **Case 0:** If $u$ is already the root, there is nothing to be done
+- **Case 1:** If $t$ is the root, then perform a single `zig` or `zag` operation, depending on which subtree of $t$ $u$ is in.
+- **Case 2:** Consider the case where both $t$ and $u$ are both left-children. First perform a `zig` on $s$ and $t$, then perform another `zig` on $t$ and $u$. Similarly, perform two `zag` operations if $t$ and $u$ are right children. 
+
+<!-- Insert Image -->
+
+- **Case 3:** Consider the case where $t$ is a right child and $u$ is a left child. First perform a `zag` on $t$ and $u$, then perform a `zig` on $s$ and $u$. Likewise, do `zig` and then `zag` if $t$ is a left child and $u$ is a right child. 
+
+<!-- Insert Image -->
+
+Finally, we define a **`splay`** operation to be the repeated iteration of `splay-step` until $u$ is at the root. In pseudocode, it looks like:
+```
+function splay(u):
+	while u is not the root:
+		splay-step(u)
+```
+
+<!-- Insert Image -->
+
+#### Operations
+- **find** - _Find an element $x$ in a given splay tree_
+
+  Find the element by walking down the splay tree (like finding an element in a regular BST). When we reach the element, run `splay` on that node. If the element is not present, we still `splay` the last visited node.
+- **merge** - _Given two trees $T_1$ and $T_2$ such that $\texttt{key}(u) < \texttt{key}(v) \; \forall u \in T_1, v \in T_2$, create a tree $T$ containing every element of both trees._
+
+  Let $T = T_1$. Find the maximum element of $T$ be repeatedly going to the right child of the current node, starting at the root. Append $T_2$ to the child of the maximum node. 
+- **split** - _Given a splay tree $T$ and a pivot $x$, the split operation partitions $T$ into two trees such that $T_1 = \{u \; | \;u \in T \text{ and } \texttt{key}(u) \leq x \}$, $T_2 = \{u \; | \;u \in T \text{ and } \texttt{key}(u) > x \}$_
+
+  Call `find` on $x$. The left subtree of the new root will be $T_2$. Disconnect the edge to its parent. $T$ can be assigned to $T_1$. 
+- **insert** - _Given an element $x$, insert it into a given splay tree $T$_
+
+  Create a new splay tree $X$ of one element $x$. Split $T$ with regard to $x$ into $T_1$ and $T_2$, and perform two merges, first with $T_1$ and $X$ and then the result of that `merge` with $T_2$.
+
+
+- **delete** - _Given an element $x$, delete it from a given splay tree $T$._
+
+  Call `find` on $x$ in $T$. If $x$ exists with $T$, it will be located at the root. We can disconnect its two children and `merge` them together, thus deleteing $x$ from the tree. 
+
+All of the operations take $\mathcal{O}(\log n)$ time. 
 
 ## Link Cut Tree
 
